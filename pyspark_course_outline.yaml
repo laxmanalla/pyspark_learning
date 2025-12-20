@@ -1,0 +1,249 @@
+- concept: "DataFrames"
+  definition: "DataFrames are distributed collections of data organized into named columns. They are similar to tables in relational databases or data frames in R/Python, but with more flexibility and power."
+  code_snippet: |
+    from pyspark.sql import SparkSession
+    spark = SparkSession.builder.appName("example").getOrCreate()
+    data = [("James", 34), ("Anna", 23)]
+    df = spark.createDataFrame(data, ["name", "age"])
+    df.show()
+
+- concept: "DataFrame.createDataFrame()"
+  definition: "Create a DataFrame from a list of tuples or a list of dictionaries."
+  code_snippet: |
+    from pyspark.sql import SparkSession
+    spark = SparkSession.builder.appName("example").getOrCreate()
+    data = [("James", 34), ("Anna", 23)]
+    df = spark.createDataFrame(data, ["name", "age"])
+    df.show()
+
+- concept: "DataFrame.toDF()"
+  definition: "Convert a collection-like object to a DataFrame or rename columns on an existing DataFrame."
+  code_snippet: |
+    from pyspark.sql import SparkSession
+    spark = SparkSession.builder.appName("example").getOrCreate()
+    data = [("James", 34), ("Anna", 23)]
+    df = spark.createDataFrame(data, ["name", "age"])
+    df = df.toDF("full_name", "years")
+    df.show()
+
+- concept: "DataFrame.selectExpr()"
+  definition: "Select columns and apply SQL expressions on them."
+  code_snippet: |
+    from pyspark.sql import SparkSession
+    spark = SparkSession.builder.appName("example").getOrCreate()
+    data = [("James", 34), ("Anna", 23)]
+    df = spark.createDataFrame(data, ["name", "age"])
+    df = df.selectExpr("name as full_name", "age as years")
+    df.show()
+
+- concept: "DataFrame.withColumnRenamed()"
+  definition: "Rename a column in a DataFrame."
+  code_snippet: |
+    from pyspark.sql import SparkSession
+    spark = SparkSession.builder.appName("example").getOrCreate()
+    data = [("James", 34), ("Anna", 23)]
+    df = spark.createDataFrame(data, ["name", "age"])
+    df = df.withColumnRenamed("name", "full_name").withColumnRenamed("age", "years")
+    df.show()
+
+- concept: "DataFrame.Column.alias()"
+  definition: "Provide an alias for a column (useful in select expressions)."
+  code_snippet: |
+    from pyspark.sql import SparkSession
+    spark = SparkSession.builder.appName("example").getOrCreate()
+    data = [("James", 34), ("Anna", 23)]
+    df = spark.createDataFrame(data, ["name", "age"])
+    df = df.select(df.name.alias("full_name"), df.age.alias("years"))
+    df.show()
+
+- concept: "DataFrame.show()"
+  definition: "Display the contents of a DataFrame."
+  code_snippet: |
+    from pyspark.sql import SparkSession
+    spark = SparkSession.builder.appName("example").getOrCreate()
+    data = [("James", 34), ("Anna", 23)]
+    df = spark.createDataFrame(data, ["name", "age"])
+    df.show()
+
+- concept: "DataFrame.select()"
+  definition: "Select specific columns from a DataFrame."
+  code_snippet: |
+    from pyspark.sql import SparkSession
+    spark = SparkSession.builder.appName("example").getOrCreate()
+    data = [("James", 34), ("Anna", 23)]
+    df = spark.createDataFrame(data, ["name", "age"])
+    df = df.select("name", "age")
+    df.show()
+
+- concept: "DataFrame.filter()"
+  definition: "Filter rows based on a condition."
+  code_snippet: |
+    from pyspark.sql import SparkSession
+    spark = SparkSession.builder.appName("example").getOrCreate()
+    data = [("James", 34), ("Anna", 23)]
+    df = spark.createDataFrame(data, ["name", "age"])
+    df = df.filter(df.age > 30)
+    df.show()
+
+- concept: "DataFrame.where()"
+  definition: "Alias for filter; filter rows based on a condition."
+  code_snippet: |
+    from pyspark.sql import SparkSession
+    spark = SparkSession.builder.appName("example").getOrCreate()
+    data = [("James", 34), ("Anna", 23)]
+    df = spark.createDataFrame(data, ["name", "age"])
+    df = df.where(df.age > 30)
+    df.show()
+
+- concept: "DataFrame.orderBy()"
+  definition: "Sort rows by one or more columns."
+  code_snippet: |
+    from pyspark.sql import SparkSession
+    spark = SparkSession.builder.appName("example").getOrCreate()
+    data = [("James", 34), ("Anna", 23)]
+    df = spark.createDataFrame(data, ["name", "age"])
+    df = df.orderBy(df.age)
+    df.show()
+
+- concept: "DataFrame.groupBy()"
+  definition: "Group rows by one or more columns and apply aggregate functions."
+  code_snippet: |
+    from pyspark.sql import SparkSession
+    spark = SparkSession.builder.appName("example").getOrCreate()
+    data = [("James", 34), ("Anna", 23)]
+    df = spark.createDataFrame(data, ["name", "age"])
+    df = df.groupBy("name").count()
+    df.show()
+
+- concept: "DataFrame.withColumn()"
+  definition: "Returns a new DataFrame by adding a column or replacing the existing column that has the same name."
+  code_snippet: |
+    from pyspark.sql.functions import col
+    from pyspark.sql import SparkSession
+    spark = SparkSession.builder.appName("example").getOrCreate()
+    data = [("James", 34), ("Anna", 23)]
+    df = spark.createDataFrame(data, ["name", "age"])
+    df = df.withColumn("new_column", col("age") * 2)
+    df.show()
+
+- concept: "DataFrame.withColumnsRenamed()"
+  definition: "Rename multiple columns in a DataFrame (user-defined helper; not a built-in API in PySpark)."
+  code_snippet: |
+    from pyspark.sql import SparkSession
+    spark = SparkSession.builder.appName("example").getOrCreate()
+    data = [("James", 34), ("Anna", 23)]
+    df = spark.createDataFrame(data, ["name", "age"])
+    # Example helper usage (pseudo)
+    df = df.withColumnsRenamed({"name": "full_name", "age": "years"})
+    df.show()
+
+- concept: "DataFrame.drop()"
+  definition: "Drop a column from a DataFrame."
+  code_snippet: |
+    from pyspark.sql import SparkSession
+    spark = SparkSession.builder.appName("example").getOrCreate()
+    data = [("James", 34), ("Anna", 23)]
+    df = spark.createDataFrame(data, ["name", "age"])
+    df = df.drop("age")
+    df.show()
+
+- concept: "DataFrame.distinct()"
+  definition: "Return a new DataFrame with duplicate rows removed."
+  code_snippet: |
+    from pyspark.sql import SparkSession
+    spark = SparkSession.builder.appName("example").getOrCreate()
+    data = [("James", 34), ("Anna", 23), ("James", 34)]
+    df = spark.createDataFrame(data, ["name", "age"])
+    df = df.distinct()
+    df.show()
+
+- concept: "DataFrame.dropDuplicates()"
+  definition: "Drop duplicate rows from a DataFrame based on specified columns."
+  code_snippet: |
+    from pyspark.sql import SparkSession
+    spark = SparkSession.builder.appName("example").getOrCreate()
+    data = [("James", 34), ("Anna", 23), ("James", 34)]
+    df = spark.createDataFrame(data, ["name", "age"])
+    df = df.dropDuplicates(["name", "age"])
+    df.show()
+
+- concept: "DataFrame.limit()"
+  definition: "Limit the number of rows returned by a DataFrame."
+  code_snippet: |
+    from pyspark.sql import SparkSession
+    spark = SparkSession.builder.appName("example").getOrCreate()
+    data = [("James", 34), ("Anna", 23), ("Bob", 28)]
+    df = spark.createDataFrame(data, ["name", "age"])
+    df = df.limit(2)
+    df.show()
+
+- concept: "DataFrame.sample()"
+  definition: "Randomly sample rows from a DataFrame based on a specified fraction."
+  code_snippet: |
+    from pyspark.sql import SparkSession
+    spark = SparkSession.builder.appName("example").getOrCreate()
+    data = [("James", 34), ("Anna", 23), ("Bob", 28)]
+    df = spark.createDataFrame(data, ["name", "age"])
+    df = df.sample(fraction=0.5)
+    df.show()
+
+- concept: "DataFrame.repartition()"
+  definition: "Repartition the data in a DataFrame into a specified number of partitions or based on specified columns."
+  code_snippet: |
+    from pyspark.sql import SparkSession
+    spark = SparkSession.builder.appName("example").getOrCreate()
+    data = [("James", 34), ("Anna", 23), ("Bob", 28)]
+    df = spark.createDataFrame(data, ["name", "age"])
+    df = df.repartition(2)
+    df.show()
+
+- concept: "DataFrame.coalesce()"
+  definition: "Reduce the number of partitions in a DataFrame by merging partitions together."
+  code_snippet: |
+    from pyspark.sql import SparkSession
+    spark = SparkSession.builder.appName("example").getOrCreate()
+    data = [("James", 34), ("Anna", 23), ("Bob", 28)]
+    df = spark.createDataFrame(data, ["name", "age"])
+    df = df.coalesce(2)
+    df.show()
+
+- concept: "DataFrame.persist()"
+  definition: "Persist the data in a DataFrame in memory or on disk for faster access later in the same session."
+  code_snippet: |
+    from pyspark.sql import SparkSession
+    spark = SparkSession.builder.appName("example").getOrCreate()
+    data = [("James", 34), ("Anna", 23), ("Bob", 28)]
+    df = spark.createDataFrame(data, ["name", "age"])
+    df = df.persist()
+    df.show()
+
+- concept: "DataFrame.cache()"
+  definition: "Persist the data in a DataFrame in memory for faster access later in the same session."
+  code_snippet: |
+    from pyspark.sql import SparkSession
+    spark = SparkSession.builder.appName("example").getOrCreate()
+    data = [("James", 34), ("Anna", 23), ("Bob", 28)]
+    df = spark.createDataFrame(data, ["name", "age"])
+    df = df.cache()
+    df.show()
+
+- concept: "DataFrame.unpersist()"
+  definition: "Unpersist the data in a DataFrame from memory or on disk to free up resources."
+  code_snippet: |
+    from pyspark.sql import SparkSession
+    spark = SparkSession.builder.appName("example").getOrCreate()
+    data = [("James", 34), ("Anna", 23), ("Bob", 28)]
+    df = spark.createDataFrame(data, ["name", "age"])
+    df = df.cache()
+    df = df.unpersist()
+    df.show()
+
+- concept: "DataFrame.explain()"
+  definition: "Print the logical and physical plans of a DataFrame for debugging and optimization."
+  code_snippet: |
+    from pyspark.sql import SparkSession
+    spark = SparkSession.builder.appName("example").getOrCreate()
+    data = [("James", 34), ("Anna", 23), ("Bob", 28)]
+    df = spark.createDataFrame(data, ["name", "age"])
+    df = df.filter(df.age > 30)
+    df.explain()

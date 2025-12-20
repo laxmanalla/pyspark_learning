@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>PySpark Flashcards</title>
+    <!-- Library to parse YAML files in the browser -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+    <style>
+        :root {
+            --primary-bg: #eef2f3;
+            --card-front-bg: #ffffff;
+            --card-back-bg: #282c34;
+            --text-color: #333;
+            --code-color: #98c379;
+            --accent-color: #61dafb;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--primary-bg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+        header { display:flex; flex-direction:column; align-items:center; margin-bottom:20px;}
+        h1 { color:#444; margin:0 0 10px 0; }
+        .file-upload-container { margin-bottom:10px; }
+        input[type="file"] { display:none; }
+        .custom-file-upload { border:1px solid #ccc; display:inline-block; padding:6px 12px; cursor:pointer; background:white; border-radius:4px; font-size:0.9rem; color:#555; transition:all .2s;}
+        .custom-file-upload:hover { background:#f0f0f0; border-color:#999; }
+        .scene { width:600px; height:400px; perspective:1000px; margin-bottom:30px; }
+        .card { width:100%; height:100%; position:relative; transition:transform .6s; transform-style:preserve-3d; cursor:pointer; box-shadow:0 10px 20px rgba(0,0,0,.1); border-radius:15px; }
+        .card.is-flipped { transform:rotateY(180deg); }
+        .card-face { position:absolute; width:100%; height:100%; backface-visibility:hidden; border-radius:15px; display:flex; flex-direction:column; justify-content:center; align-items:center; padding:20px; box-sizing:border-box; text-align:center; }
+        .card-front { background-color:var(--card-front-bg); color:var(--text-color); border:2px solid #ddd; }
+        .concept-title { font-size:2rem; font-weight:bold; color:#2c3e50; margin-bottom:20px; }
+        .concept-definition { font-size:1.2rem; line-height:1.6; color:#555; }
+        .hint { position:absolute; bottom:15px; font-size:.8rem; color:#999; }
+        .card-back { background-color:var(--card-back-bg); color:white; transform:rotateY(180deg); align-items:flex-start; text-align:left; border:2px solid #444; }
+        .code-label { position:absolute; top:15px; left:20px; font-size:.9rem; color:#aaa; font-weight:bold; text-transform:uppercase; }
+        pre { background:rgba(0,0,0,.3); padding:15px; border-radius:8px; width:100%; height:70%; overflow:auto; white-space:pre-wrap; font-family:'Consolas','Monaco','Courier New',monospace; font-size:1rem; color:var(--code-color); text-align:left; }
+        .controls { display:flex; gap:20px; }
+        button { padding:10px 25px; font-size:1rem; border:none; border-radius:5px; background-color:#2c3e50; color:white; cursor:pointer; transition:background .3s; }
+        button:hover { background-color:#34495e; }
+        button:disabled { background-color:#ccc; cursor:not-allowed; }
+        .progress { margin-top:15px; color:#777; }
+        @media (max-width:650px) {
+            .scene { width:90%; height:300px; }
+            .concept-title { font-size:1.5rem; }
+            .concept-definition { font-size:1rem; }
+            pre { font-size:.85rem; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>⚡ PySpark Flashcards</h1>
+        <div class="file-upload-container">
+            <label class="custom-file-upload">
+                <input type="file" id="yaml-input" accept=".yaml,.yml" />
+                📂 Load YAML File
+            </label>
+        </div>
+    </header>
+
+    <div class="scene">
+        <div class="card" id="card">
+            <div class="card-face card-front">
+                <div class="concept-title" id="display-concept">Welcome!</div>
+                <div class="concept-definition" id="display-definition">
+                    Loading cards...
+                </div>
+                <div class="hint">Tap to flip</div>
+            </div>
+
+            <div class="card-face card-back">
+                <div class="code-label">Example Code</div>
+                <pre id="display-code">
+# Your code will appear here
+                </pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button id="btn-prev" onclick="prevCard()">&#8592; Previous</button>
+        <button id="btn-next" onclick="nextCard()">Next &#8594;</button>
+    </div>
+
+    <div class="progress" id="progress-text">Loading...</div>
+
+    <script>
+        // Demo fallback data (used if YAML can't be loaded)
+        let flashcards = [
+            {
+                concept: "PySpark Session",
+                definition: "The entry point to programming Spark with the Dataset and DataFrame API.",
+                code_snippet: `from pyspark.sql import SparkSession\n\nspark = SparkSession.builder \\\n    .appName("FlashcardApp") \\\n    .getOrCreate()`
+            },
+            {
+                concept: "DataFrame.filter()",
+                definition: "Filters rows using the given condition.",
+                code_snippet: `# Filter for age greater than 21\ndf.filter(df.age > 21).show()\n\n# SQL-like syntax\ndf.filter("age > 21").show()`
+            }
+        ];
+
+        // Paths to try (relative first, then absolute). Adjust as needed.
+        const yamlPathsToTry = [
+            './pyspark_course_outline.yaml',
+            'pyspark_course_outline.yaml',
+            '/home/laxma/Documents/DataEngineering_course/pyspark_course_outline.yaml'
+        ];
+
+        let currentIndex = 0;
+        const cardElement = document.getElementById('card');
+        const conceptEl = document.getElementById('display-concept');
+        const defEl = document.getElementById('display-definition');
+        const codeEl = document.getElementById('display-code');
+        const progressEl = document.getElementById('progress-text');
+        const btnPrev = document.getElementById('btn-prev');
+        const btnNext = document.getElementById('btn-next');
+        const fileInput = document.getElementById('yaml-input');
+
+        // Try loading YAML automatically from default locations
+        (function tryLoadDefaultYaml(paths, idx = 0) {
+            if (idx >= paths.length) {
+                // all attempts failed — use demo data
+                progressEl.textContent = `Demo Mode — ${flashcards.length} cards`;
+                updateCard();
+                return;
+            }
+            const path = paths[idx];
+            fetch(path)
+                .then(resp => {
+                    if (!resp.ok) throw new Error(`Fetch failed: ${resp.status}`);
+                    return resp.text();
+                })
+                .then(text => {
+                    try {
+                        const parsed = jsyaml.load(text);
+                        if (Array.isArray(parsed) && parsed.length > 0) {
+                            flashcards = parsed;
+                            currentIndex = 0;
+                            resetFlip();
+                            updateCard();
+                            alert(`Successfully loaded ${flashcards.length} cards from ${path}`);
+                        } else {
+                            throw new Error('YAML did not contain a list of cards');
+                        }
+                    } catch (e) {
+                        console.warn('YAML parse error for', path, e);
+                        // try next path
+                        tryLoadDefaultYaml(paths, idx + 1);
+                    }
+                })
+                .catch(err => {
+                    console.warn('Could not fetch', path, err);
+                    // try next path
+                    tryLoadDefaultYaml(paths, idx + 1);
+                });
+        })(yamlPathsToTry);
+
+        // --- File Upload Logic (fallback/manual) ---
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                const content = ev.target.result;
+                try {
+                    const parsedData = jsyaml.load(content);
+                    if (Array.isArray(parsedData) && parsedData.length > 0) {
+                        flashcards = parsedData;
+                        currentIndex = 0;
+                        resetFlip();
+                        updateCard();
+                        alert(`Successfully loaded ${flashcards.length} cards!`);
+                    } else {
+                        alert("Error: The YAML file must contain a list of cards.");
+                    }
+                } catch (error) {
+                    console.error(error);
+                    alert("Error parsing YAML file. Please check the format.");
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        // --- Flip Logic ---
+        cardElement.addEventListener('click', function() {
+            cardElement.classList.toggle('is-flipped');
+        });
+
+        // --- Navigation Logic ---
+        function nextCard() {
+            if (!flashcards || flashcards.length === 0) return;
+            if (currentIndex < flashcards.length - 1) {
+                resetFlip();
+                setTimeout(() => {
+                    currentIndex++;
+                    updateCard();
+                }, 300);
+            }
+        }
+
+        function prevCard() {
+            if (!flashcards || flashcards.length === 0) return;
+            if (currentIndex > 0) {
+                resetFlip();
+                setTimeout(() => {
+                    currentIndex--;
+                    updateCard();
+                }, 300);
+            }
+        }
+
+        function resetFlip() {
+            if (cardElement.classList.contains('is-flipped')) {
+                cardElement.classList.remove('is-flipped');
+            }
+        }
+
+        function updateCard() {
+            if (!flashcards || flashcards.length === 0) {
+                conceptEl.textContent = "No cards available";
+                defEl.innerHTML = "";
+                codeEl.textContent = "";
+                progressEl.textContent = "No cards";
+                btnPrev.disabled = true;
+                btnNext.disabled = true;
+                return;
+            }
+            const data = flashcards[currentIndex] || {};
+            conceptEl.textContent = data.concept || "No Title";
+            defEl.innerHTML = (data.definition || "No definition").replace(/\n/g, "<br>");
+            codeEl.textContent = data.code_snippet || "No code provided";
+            progressEl.textContent = `Card ${currentIndex + 1} of ${flashcards.length}`;
+            btnPrev.disabled = currentIndex === 0;
+            btnNext.disabled = currentIndex === flashcards.length - 1;
+        }
+
+        // Keyboard Support
+        document.addEventListener('keydown', (e) => {
+            if (e.key === "ArrowRight") nextCard();
+            if (e.key === "ArrowLeft") prevCard();
+            if (e.key === " " || e.key === "Enter") cardElement.classList.toggle('is-flipped');
+        });
+    </script>
+</body>
+</html>

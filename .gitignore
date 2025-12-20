@@ -1,0 +1,6 @@
+.*_env
+.env
+*.png
+course_outline.yml
+
+
