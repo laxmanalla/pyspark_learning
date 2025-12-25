@@ -46,6 +46,8 @@
         min-height:56px;
       }
 
+      .yaml-note{font-size:0.9rem;color:var(--muted);margin-left:12px}
+
       .logo{
         font-family:'Fredoka One', cursive;
         font-size:28px;
@@ -128,12 +130,13 @@
       <header>
         <div class="logo">Learning</div>
         <nav>
-          <ul>
+            <ul>
             <!-- <li><a href="#" class="active" data-name="data-basics">Data Basics</a></li> -->
             <li><a href="#" class="active" data-name="pyspark" data-src="pyspark.html">PySpark</a></li>
             <li><a href="#"  data-name="data-basics">Data Basics</a></li>
-            <li><a href="#" data-name="sql">SQL</a></li>
+            <li><a href="#" data-name="sql" data-src="sql.html">SQL</a></li>
           </ul>
+          <div class="yaml-note" id="file-note"></div>
         </nav>
       </header>
 
@@ -159,6 +162,13 @@
         const dataSrc = a.getAttribute('data-src');
         const href = a.getAttribute('href');
         const src = dataSrc || (href && href !== '#' ? href : '');
+        // show file-note when appropriate (e.g. SQL tab)
+        // const fileNote = document.getElementById('file-note');
+        // if (a.getAttribute('data-name') === 'sql'){
+        //   if (fileNote) fileNote.textContent = '#file:sql.html';
+        // } else {
+        //   if (fileNote) fileNote.textContent = '';
+        // }
         if (src){
           blank.style.display = 'none';
           embedFrame.style.display = 'block';

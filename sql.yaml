@@ -1,0 +1,189 @@
+block1:
+  Topic: "Introduction to SQL and Relational Databases"
+  Description: |
+    SQL (Structured Query Language) is the standard language for dealing with Relational Databases (RDBMS). A relational database organizes data into tables (relations) with rows and columns. SQL allows you to perform C.R.U.D operations: Create, Read, Update, and Delete.
+  real_world_example: "A library system uses SQL. The 'Books' table stores book details, the 'Members' table stores user info, and the 'Loans' table links a specific book to a specific member."
+  extra_content: "Common RDBMS include PostgreSQL, MySQL, SQL Server, and Oracle."
+  example: |
+    -- A conceptual look at a table structure
+    /*
+    Table: Employees
+    +----+----------+--------+
+    | ID | Name     | Dept   |
+    +----+----------+--------+
+    | 1  | Alice    | HR     |
+    | 2  | Bob      | IT     |
+    +----+----------+--------+
+    */
+    -- Simple query to get data
+    SELECT * FROM Employees;
+  example_explanation: "This is the most fundamental concept: Data is stored in grids (tables), and we use SQL commands to interact with those grids."
+
+block2:
+  Topic: "Data Definition Language (DDL)"
+  Description: |
+    DDL consists of SQL commands used to define the database schema. It simply deals with descriptions of the database schema and is used to create and modify the structure of database objects in the database. Key commands include CREATE, ALTER, and DROP.
+  real_world_example: "Before a user can sign up for an app, the developers must first CREATE the 'Users' table to hold the data. Later, if they want to add a 'Phone Number' field, they ALTER the table."
+  extra_content: "Be very careful with DROP; it removes the structure and the data permanently."
+  example: |
+    -- Create a new table
+    CREATE TABLE Students (
+        StudentId INT PRIMARY KEY,
+        FirstName VARCHAR(50),
+        LastName VARCHAR(50),
+        EnrollmentDate DATE
+    );
+
+    -- Add a new column to an existing table
+    ALTER TABLE Students
+    ADD Email VARCHAR(100);
+
+    -- Delete the table entirely
+    -- DROP TABLE Students;
+  example_explanation: "The CREATE command sets up the 'Students' bucket. The ALTER command adds a slot for emails to that bucket. The DROP command (commented out for safety) would destroy the bucket."
+
+block3:
+  Topic: "Basic Data Retrieval (SELECT)"
+  Description: |
+    The SELECT statement is used to select data from a database. The data returned is stored in a result table, called the result-set. You can select specific columns or all columns using the asterisk (*).
+  real_world_example: "An email marketing tool needs to send a newsletter. It uses a SELECT statement to pull just the 'EmailAddress' and 'FirstName' columns from the user database, ignoring passwords or user IDs."
+  extra_content: "Use 'SELECT DISTINCT' to return only different (unique) values."
+  example: |
+    -- Select specific columns
+    SELECT FirstName, LastName 
+    FROM Employees;
+
+    -- Select all columns
+    SELECT * FROM Employees;
+
+    -- Select unique department names
+    SELECT DISTINCT Department 
+    FROM Employees;
+  example_explanation: "The first query grabs only names. The second grabs every piece of data available for employees. The third lists every unique department exists (e.g., if 50 people work in Sales, 'Sales' appears once)."
+
+block4:
+  Topic: "Filtering Data (WHERE and Operators)"
+  Description: |
+    The WHERE clause is used to filter records. It extracts only those records that fulfill a specified condition. It supports operators like =, <>, >, <, AND, OR, and NOT.
+  real_world_example: "An e-commerce site user clicks 'Show items under $50'. The database runs a query using WHERE Price < 50."
+  extra_content: "Strings in SQL are usually enclosed in single quotes (e.g., 'Text'). Numbers are not."
+  example: |
+    -- Filter by specific value
+    SELECT * FROM Orders
+    WHERE Status = 'Shipped';
+
+    -- Filter with logic (AND)
+    SELECT * FROM Products
+    WHERE Price < 100 AND Category = 'Electronics';
+
+    -- Filter with logic (OR)
+    SELECT * FROM Customers
+    WHERE City = 'New York' OR City = 'London';
+  example_explanation: "These queries narrow down the full list of data to find exactly what is needed based on specific criteria like price, status, or location."
+
+block5:
+  Topic: "Pattern Matching and Lists (LIKE and IN)"
+  Description: |
+    The LIKE operator is used in a WHERE clause to search for a specified pattern in a column (using % as a wildcard). The IN operator allows you to specify multiple values in a WHERE clause.
+  real_world_example: "A search bar implementation. When you type 'Sam', the system searches for names LIKE 'Sam%'. The IN operator is used when a user selects multiple categories (e.g., 'Shoes' AND 'Hats')."
+  extra_content: "'%' represents zero, one, or multiple characters. '_' represents a single character."
+  example: |
+    -- Find names starting with 'J'
+    SELECT * FROM Users
+    WHERE Name LIKE 'J%';
+
+    -- Find emails ending in gmail.com
+    SELECT * FROM Users
+    WHERE Email LIKE '%@gmail.com';
+
+    -- Find users in specific list of IDs
+    SELECT * FROM Users
+    WHERE UserID IN (1, 5, 10, 12);
+  example_explanation: "LIKE allows for 'fuzzy' matching or partial strings. IN is a shorthand for multiple 'OR' conditions."
+
+block6:
+  Topic: "Sorting and Limiting Results"
+  Description: |
+    ORDER BY is used to sort the result-set in ascending (ASC) or descending (DESC) order. LIMIT (or TOP in SQL Server) restricts the number of rows returned.
+  real_world_example: "A 'Top 10 Songs' leaderboard. The database selects songs, ORDERS BY play_count DESC, and LIMITS to 10."
+  extra_content: "By default, ORDER BY sorts in ascending order."
+  example: |
+    -- Sort employees by salary (highest to lowest)
+    SELECT * FROM Employees
+    ORDER BY Salary DESC;
+
+    -- Get the 5 most recent orders
+    SELECT * FROM Orders
+    ORDER BY OrderDate DESC
+    LIMIT 5;
+  example_explanation: "Sorting helps organize raw data for human reading. Limiting is crucial for performance when dealing with massive tables."
+
+block7:
+  Topic: "Aggregate Functions"
+  Description: |
+    Aggregate functions perform a calculation on a set of values and return a single value. Common functions include COUNT(), SUM(), AVG(), MIN(), and MAX().
+  real_world_example: "A financial dashboard. It needs to show the Total Revenue (SUM), Number of Transactions (COUNT), and Average Transaction Value (AVG)."
+  extra_content: "Aggregates ignore NULL values (except COUNT(*))."
+  example: |
+    -- Count total employees
+    SELECT COUNT(*) FROM Employees;
+
+    -- Calculate total payroll
+    SELECT SUM(Salary) FROM Employees;
+
+    -- Find the most expensive product
+    SELECT MAX(Price) FROM Products;
+  example_explanation: "Instead of returning lists of rows, these queries return a single number that summarizes the data."
+
+block8:
+  Topic: "Grouping Data (GROUP BY and HAVING)"
+  Description: |
+    GROUP BY groups rows that have the same values into summary rows. It is often used with aggregate functions. HAVING is used to filter groups (because WHERE cannot be used with aggregate functions).
+  real_world_example: "A report showing 'Sales per Country'. You GROUP BY Country and SUM(Sales). If you only want countries with over $1M in sales, you use HAVING SUM(Sales) > 1000000."
+  extra_content: "The order of operations is: WHERE filters rows -> GROUP BY groups them -> HAVING filters the groups."
+  example: |
+    -- Count employees per department
+    SELECT Department, COUNT(*) as EmpCount
+    FROM Employees
+    GROUP BY Department;
+
+    -- Departments with high average salary only
+    SELECT Department, AVG(Salary) as AvgSal
+    FROM Employees
+    GROUP BY Department
+    HAVING AVG(Salary) > 70000;
+  example_explanation: "The first query buckets employees by department and counts them. The second does the same math but throws away any department buckets where the average pay is too low."
+
+block9:
+  Topic: "Joins (INNER, LEFT, RIGHT)"
+  Description: |
+    A JOIN clause is used to combine rows from two or more tables, based on a related column between them. INNER JOIN returns matching records. LEFT JOIN returns all from the left table and matched records from the right.
+  real_world_example: "Viewing an Order History. The 'Orders' table has an ID, but the 'Customers' table has the name. To show 'Order #123 by John Doe', you join the tables on CustomerID."
+  extra_content: ""
+  example: |
+    -- INNER JOIN: Only show customers who have placed orders
+    SELECT Customers.Name, Orders.OrderDate
+    FROM Customers
+    INNER JOIN Orders ON Customers.CustomerID = Orders.CustomerID;
+
+    -- LEFT JOIN: Show ALL customers, even if they have no orders
+    SELECT Customers.Name, Orders.OrderDate
+    FROM Customers
+    LEFT JOIN Orders ON Customers.CustomerID = Orders.CustomerID;
+  example_explanation: "INNER JOIN is exclusive (must exist in both). LEFT JOIN is inclusive of the primary table (Customers) regardless of whether they have matching data in the secondary table (Orders)."
+
+block10:
+  Topic: "Subqueries (Nested Queries)"
+  Description: |
+    A subquery is a query nested inside another query (usually in a WHERE clause). It allows you to use the result of one query to drive the logic of another.
+  real_world_example: "Finding employees who earn more than the company average. First, you calculate the average (Subquery), then you find people earning more than that number (Outer Query)."
+  extra_content: "Subqueries must be enclosed in parentheses."
+  example: |
+    -- Find products that are more expensive than the average product
+    SELECT ProductName, Price
+    FROM Products
+    WHERE Price > (
+        SELECT AVG(Price) 
+        FROM Products
+    );
+  example_explanation: "The database runs the inner query first (calculates the average), then uses that resulting number to run the outer query (filtering the list)."
